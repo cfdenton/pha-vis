@@ -1,48 +1,59 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <link href="d3-geomap/css/d3.geomap.css" rel="stylesheet">
         <script src="d3-geomap/vendor/d3.geomap.dependencies.min.js"></script> 
         <script src="d3-geomap/js/d3.geomap.min.js"></script>
+        <link href="d3-geomap/css/d3.geomap.css" rel="stylesheet">
+        <script src="neighborhoods.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.7/d3.min.js"></script>
     </head>
     <body>
+        <h1>
+            PHA Map Vis
+        </h1>
         <script>
 
-        </script>
-        <script>
-
-            d3.json("d3-geomap/topojson/world/countries.json", draw);
-            
-            function draw(error, data) {
-                console.log(data);
+            //d3.json("neighborhoods.js", draw);
+            draw("" , neighborhoods_json.features); 
+            function draw(error, feat) {
+                console.log(feat);
                 var width = 700,
                     height = 580;
                 var svg = d3.select("body")
                     .append("svg")
                     .attr("width", width)
-                    .attr("height", height)
-                
+                    .attr("height", height);
+                    
+                //alert("hi");
+            
                 /*
                 svg.append("rect")
                     .attr("width", 100)
                     .attr("height", 100)
                     .style("fill", "blue");
                 */
+
                 var g = svg.append("g");
-                var robinsonProjection = d3.geo.robinson() 
-                    .scale(150)
-                    .translate([width/2, height/2]);
+
+                var albersProjection = d3.geo.albers() 
+                    .scale(19000)
+                    .rotate([71.057, 0])
+                    .translate([width/2, 1500]);
 
                 var path = d3.geo.path()
-                    .projection(robinsonProjection);
+                    .projection(albersProjection);
                 
                 var p = g.selectAll('path')
-                    .data(data.arcs)
+                    .data(neighborhoods_json.features)
                     .enter()
                     .append('path')
                     .attr("fill", "#ccc")
                     .attr("d", path);
+
+                /*
+                */
             }
+
         </script>
     </body>
 </html>
