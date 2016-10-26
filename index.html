@@ -9,49 +9,37 @@
     </head>
     <body>
         <h1>
-            PHA Map Vis
+            <center> PHA Map Vis </center>
         </h1>
         <script>
 
-            //d3.json("neighborhoods.js", draw);
-            draw("" , neighborhoods_json.features); 
-            function draw(error, feat) {
-                console.log(feat);
-                var width = 700,
-                    height = 580;
+            d3.json("world_countries.json", draw);
+            function draw(error, data) {
+                if (error) return console.error(error);
+                feat = data.features;
+                var width = 1350,
+                    height = 700;
                 var svg = d3.select("body")
+                    .append("center")
                     .append("svg")
                     .attr("width", width)
                     .attr("height", height);
-                    
-                //alert("hi");
-            
-                /*
-                svg.append("rect")
-                    .attr("width", 100)
-                    .attr("height", 100)
-                    .style("fill", "blue");
-                */
 
                 var g = svg.append("g");
 
-                var albersProjection = d3.geo.albers() 
-                    .scale(19000)
-                    .rotate([71.057, 0])
-                    .translate([width/2, 1500]);
+                var robinsonProjection = d3.geo.robinson() 
+                    .scale(220)
+                    .translate([width/2, height/2]);
 
                 var path = d3.geo.path()
-                    .projection(albersProjection);
+                    .projection(robinsonProjection);
                 
                 var p = g.selectAll('path')
-                    .data(neighborhoods_json.features)
+                    .data(feat)
                     .enter()
                     .append('path')
                     .attr("fill", "#ccc")
                     .attr("d", path);
-
-                /*
-                */
             }
 
         </script>
