@@ -10,17 +10,23 @@
             <center> PHA Map Vis </center>
         </h1>
         <script>
-            d3.json("data/world_countries.json", draw);
-            function draw(error, data) {
+            var width = 1350,
+                height = 700;
+            
+            var displayWidth = 300;
+                displayHeight = 150;
+
+            var svg = d3.select("body")
+                .append("center")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+
+            d3.json("data/world_countries.json", drawMap);
+            function drawMap(error, data) {
                 if (error) return console.error(error);
                 feat = data.features;
-                var width = 1350,
-                    height = 700;
-                var svg = d3.select("body")
-                    .append("center")
-                    .append("svg")
-                    .attr("width", width)
-                    .attr("height", height);
 
                 var g = svg.append("g");
 
@@ -37,6 +43,49 @@
                     .append('path')
                     .attr("fill", "#ccc")
                     .attr("d", path);
+
+                    displayBox(0, sampleData)
+            }
+            
+            var sampleData = {
+                'name': 'Health and Environment',
+                'type': 'Research Project'
+            }
+
+            function displayBox(error, data) {
+                if (error) return console.error(error);
+                var g = svg.append("g");
+                
+                var box = g.append("rect");
+                box.attr('width', displayWidth)
+                    .attr('height', displayHeight)
+                    .attr('x', 100)
+                    .attr('y', 100)
+                    .attr('rx', 5)
+                    .attr('ry', 5)
+                    .style('fill', 'green')
+                    .style('opacity', .25);
+
+                var name = g.append('text')
+                    .attr('x', parseFloat(box.attr('x')) + 5)
+                    .attr('y', parseFloat(box.attr('y')) + 20)
+                    .text('Name: ' + sampleData.name);
+                var nameBox = name.node().getBBox();
+                var nameWidth = nameBox.width;
+                var nameHeight = nameBox.height;
+               
+                var type = g.append('text') 
+                    .attr('x', parseFloat(box.attr('x')) + 5)
+                    .attr('y', parseFloat(box.attr('y')) + 40)
+                    .text('Type: ' + sampleData.type);
+                var typeBox = type.node().getBBox();
+                var typeWidth = typeBox.width;
+                var typeHeight = typeBox.height;
+                
+                var dWidth = Math.max(nameWidth, typeWidth);
+                var dHeight = nameHeight + typeHeight;
+                box.attr('width', dWidth + 10); 
+                box.attr('height', dHeight + 20);
             }
 
         </script>
