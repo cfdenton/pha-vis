@@ -23,16 +23,24 @@
                 .append("svg")
                 .attr("width", width)
                 .attr("height", height);
+ 
+            var sampleData = {
+                'id': 'whatever',
+                'name': 'Health and Environment',
+                'type': 'Research Project',
+                'coord': aa,
+            }
+
+            var robinsonProjection = d3.geo.robinson() 
+                .scale(220)
+                .translate([width/2, height/2]);
+
 
             function draw(error, data) {
                 if (error) return console.error(error);
                 feat = data.features;
                 
                 var g = svg.append("g");
-
-                var robinsonProjection = d3.geo.robinson() 
-                    .scale(220)
-                    .translate([width/2, height/2]);
 
                 var path = d3.geo.path()
                     .projection(robinsonProjection);
@@ -44,39 +52,42 @@
                     .attr("fill", "#ccc")
                     .attr("d", path);
 
+                console.log(sampleData);
 
-                /*
-                svg.selectAll("circle")
-                    .data([aa,bb]).enter()
+
+                svg.selectAll("g")
+                    .data([0, sampleData]).enter()
                     .append("svg:image")
-                    .attr("x", function (d) {return robinsonProjection(d)[0] - 20 })
-                    .attr("y", function (d) {return robinsonProjection(d)[1] - 40 })
+                    .attr("x", function (d) {console.log(d); return robinsonProjection(d.coord)[0] - 20 })
+                    .attr("y", function (d) {return robinsonProjection(d.coord)[1] - 40 })
                     .attr("xlink:href", "http://www.clker.com/cliparts/g/R/z/I/u/o/map-pin-hi.png")
                     .attr("width", 40)
                     .attr("height", 40)
-                    .on("click", function() {
-                        svg.selectAll("circle").attr("fill", "blue");
-                        displayBox(None, data);
+                    .on("click", function(d) {
+                        var currentBox = d3.select('#' + d.id)
+                        if (currentBox.size() == 0) {
+                            displayBox(0, d);
+                        }
+                        else if (currentBox.style('opacity') > 0) {
+                            currentBox.style('opacity', 0) 
+                        } else {
+                            currentBox.style('opacity', 1) 
+                        }
                     });
-                */
-                displayBox(0, sampleData);
             }
-            
-            var sampleData = {
-                'name': 'Health and Environment',
-                'type': 'Research Project'
-            }
-            
+                      
             function displayBox(error, data) {
                 if (error) return console.error(error);
 
-                var g = svg.append("g");
+                var g = svg.append("g")
+                    .attr('id', data.id);
                 
                 var box = g.append("rect");
+
                 box.attr('width', displayWidth)
                     .attr('height', displayHeight)
-                    .attr('x', 100)
-                    .attr('y', 100)
+                    .attr('x', robinsonProjection(data.coord)[0] - 100)
+                    .attr('y', robinsonProjection(data.coord)[1] - 100)
                     .attr('rx', 5)
                     .attr('ry', 5)
                     .style('fill', 'green')
