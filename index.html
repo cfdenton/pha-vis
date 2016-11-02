@@ -14,17 +14,20 @@
             d3.json("data/world_countries.json", draw);
             aa = [-122.490402, 37.786453];
             bb = [-122.389809, 37.72728];
+            var width = 1350,
+                height = 700,
+                displayWidth,
+                displayHeight;
+            var svg = d3.select("body")
+                .append("center")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
             function draw(error, data) {
                 if (error) return console.error(error);
                 feat = data.features;
-                var width = 1350,
-                    height = 700;
-                var svg = d3.select("body")
-                    .append("center")
-                    .append("svg")
-                    .attr("width", width)
-                    .attr("height", height);
-
+                
                 var g = svg.append("g");
 
                 var robinsonProjection = d3.geo.robinson() 
@@ -42,6 +45,7 @@
                     .attr("d", path);
 
 
+                /*
                 svg.selectAll("circle")
                     .data([aa,bb]).enter()
                     .append("svg:image")
@@ -52,17 +56,20 @@
                     .attr("height", 40)
                     .on("click", function() {
                         svg.selectAll("circle").attr("fill", "blue");
+                        displayBox(None, data);
                     });
-
+                */
+                displayBox(0, sampleData);
             }
             
             var sampleData = {
                 'name': 'Health and Environment',
                 'type': 'Research Project'
             }
-
+            
             function displayBox(error, data) {
                 if (error) return console.error(error);
+
                 var g = svg.append("g");
                 
                 var box = g.append("rect");
@@ -78,7 +85,7 @@
                 var name = g.append('text')
                     .attr('x', parseFloat(box.attr('x')) + 5)
                     .attr('y', parseFloat(box.attr('y')) + 20)
-                    .text('Name: ' + sampleData.name);
+                    .text('Name: ' + data.name);
                 var nameBox = name.node().getBBox();
                 var nameWidth = nameBox.width;
                 var nameHeight = nameBox.height;
