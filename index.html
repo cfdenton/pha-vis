@@ -10,6 +10,32 @@
             <center> PHA Map Vis </center>
         </h1>
         <script>
+            function get_coordinates(coordinates) {
+                // if (parseFloat(coordinates) == NaN) {
+                //     return coordinates;
+                // }
+                var coordinates = coordinates.split(",");
+                var latitude = parseFloat(coordinates[0]);
+                var longitude = parseFloat(coordinates[1]);
+                if (coordinates[0].search(" S") !== -1) {
+                    latitude = -latitude;
+                };
+                if (coordinates[1].search(" W") !== -1) {
+                    longitude = -longitude;
+                };
+                return [latitude,longitude];
+            }
+            var data = d3.csv("data/sample.csv", function (d) {
+                return {
+                    title : d.Title,
+                    resource_type: d["Resource type"],
+                    location: get_coordinates(d["Location of primary affiliated instution"]),
+                    research_location: d["Research location"],
+                    description: d["Description"],
+                };
+            }, function(data) {
+                console.log(data)
+            });
             d3.json("data/world_countries.json", draw);
             function draw(error, data) {
                 if (error) return console.error(error);
