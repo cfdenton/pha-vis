@@ -4,6 +4,7 @@
     <head>
         <script src="https://d3js.org/d3.v4.min.js"></script>
         <script src="d3-geomap/vendor/d3.geomap.dependencies.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     </head>
     <body>
         <h1>
@@ -37,6 +38,8 @@
                 console.log(data)
             });
             d3.json("data/world_countries.json", draw);
+            aa = [-122.490402, 37.786453];
+            bb = [-122.389809, 37.72728];
             function draw(error, data) {
                 if (error) return console.error(error);
                 feat = data.features;
@@ -63,8 +66,21 @@
                     .append('path')
                     .attr("fill", "#ccc")
                     .attr("d", path);
-            }
 
+
+                svg.selectAll("circle")
+                    .data([aa,bb]).enter()
+                    .append("svg:image")
+                    .attr("x", function (d) {return robinsonProjection(d)[0] - 20 })
+                    .attr("y", function (d) {return robinsonProjection(d)[1] - 40 })
+                    .attr("xlink:href", "http://www.clker.com/cliparts/g/R/z/I/u/o/map-pin-hi.png")
+                    .attr("width", 40)
+                    .attr("height", 40)
+                    .on("click", function() {
+                        svg.selectAll("circle").attr("fill", "blue");
+                    });
+
+            }
         </script>
     </body>
 </html>
