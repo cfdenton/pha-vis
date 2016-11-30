@@ -11,10 +11,22 @@
             <center> PHA Map Vis </center>
         </h1>
         <script>
+            // Helper functions
+            d3.selection.prototype.moveToFront = function() {
+                return this.each(function(){
+                    this.parentNode.appendChild(this);
+                });
+            };
+            d3.selection.prototype.moveToBack = function() {
+                return this.each(function(){
+                    var firstChild = this.parentNode.firstChild;
+                    if (firstChild) {
+                        this.parentNode.insertBefore(this, firstChild);
+                    }
+                });
+            };
+
             function get_coordinates(coordinates) {
-                // if (parseFloat(coordinates) == NaN) {
-                //     return coordinates;
-                // }
                 var coordinates = coordinates.split(",");
                 var latitude = parseFloat(coordinates[0]);
                 var longitude = parseFloat(coordinates[1]);
@@ -24,45 +36,56 @@
                 if (coordinates[1].search(" W") !== -1) {
                     longitude = -longitude;
                 };
-                return [latitude,longitude];
+                return [longitude, latitude];
             }
-            var data = d3.csv("data/sample.csv", function (d) {
-                return {
-                    title : d.Title,
-                    resource_type: d["Resource type"],
-                    location: get_coordinates(d["Location of primary affiliated instution"]),
-                    research_location: d["Research location"],
-                    description: d["Description"],
-                };
-            }, function(data) {
-                console.log(data)
-            });
-            d3.json("data/world_countries.json", draw);
-            aa = [-122.490402, 37.786453];
-            bb = [-122.389809, 37.72728];
+
+        </script>
+        <script>
             var width = 1350,
                 height = 700,
                 displayWidth,
                 displayHeight;
+
             var svg = d3.select("body")
                 .append("center")
                 .append("svg")
                 .attr("width", width)
                 .attr("height", height);
- 
-            var sampleData = {
-                'id': 'whatever',
-                'name': 'Health and Environment',
-                'type': 'Research Project',
-                'coord': aa,
+
+            /*
+            svg.call(d3.zoom()
+                .scaleExtent([1 / 2, 4])
+                .on("zoom", zoomed))
+
+            function zoomed() {
+                context.save();
+                context.clearRect(0, 0, width, height)
             }
+            */
+ 
+            d3.json("data/world_countries.json", drawMap);
+
+            var dataPoints = d3.csv("data/sample.csv", 
+                function (data) {
+                    var acc = 0;
+                    var newData = data.map(function (d) {
+                        return {
+                            id : "point".concat(acc++),
+                            name : d.Title,
+                            type: d["Resource type"],
+                            coord: get_coordinates(d["Location of primary affiliated instution"]),
+                            research_location: d["Research location"],
+                            description: d["Description"],
+                        };});
+                    drawData(newData);
+            });
 
             var robinsonProjection = d3.geo.robinson() 
                 .scale(220)
                 .translate([width/2, height/2]);
 
 
-            function draw(error, data) {
+            function drawMap(error, data) {
                 if (error) return console.error(error);
                 feat = data.features;
                 
@@ -77,36 +100,59 @@
                     .append('path')
                     .attr("fill", "#ccc")
                     .attr("d", path);
-
-                console.log(sampleData);
-
-
-                svg.selectAll("g")
-                    .data([0, sampleData]).enter()
+            }
+    
+            //drawData(dataPoints);
+            function drawData(data) {
+                //console.log("data", data);
+                var dataPoints = svg.selectAll(".point")
+                    .data(data).enter()
+                    .append("g")
+                    .attr("class", "point")
                     .append("svg:image")
-                    .attr("x", function (d) {console.log(d); return robinsonProjection(d.coord)[0] - 20 })
+                    .attr("id", function (d) {return d.id})
+                    .attr("x", function (d) {return robinsonProjection(d.coord)[0] - 20 })
                     .attr("y", function (d) {return robinsonProjection(d.coord)[1] - 40 })
-                    .attr("xlink:href", "http://www.clker.com/cliparts/g/R/z/I/u/o/map-pin-hi.png")
+                    //.attr("xlink:href", "http://www.clker.com/cliparts/g/R/z/I/u/o/map-pin-hi.png")
+                    //.attr("xlink:href", "http://img.freepik.com/free-icon/location-pin_318-78238.jpg")
+                    .attr("xlink:href", "location-pin_318-78238.png")
                     .attr("width", 40)
                     .attr("height", 40)
+                    .moveToFront();
+    
+                d3.selectAll(".point")
                     .on("click", function(d) {
-                        var currentBox = d3.select('#' + d.id)
+                        var currentBox = d3.select('#' + d.id + "-box");
+                        console.log("selecting " + d.id + "-box");
+                        
                         if (currentBox.size() == 0) {
+                            d3.selectAll('[id$="-box"]')
+                                .style('opacity', 0)
+                                .moveToBack();
                             displayBox(0, d);
                         }
                         else if (currentBox.style('opacity') > 0) {
-                            currentBox.style('opacity', 0) 
+                            d3.selectAll('[id$="-box"]')
+                                .style('opacity', 0)
+                                .moveToBack();
                         } else {
-                            currentBox.style('opacity', 1) 
+                            d3.selectAll('[id$="-box"]')
+                                .style('opacity', 0)
+                                .moveToBack();
+                            currentBox.style('opacity', 1).moveToFront();
                         }
                     });
             }
                       
+
+
+            // Build a display for data point 'data'
             function displayBox(error, data) {
                 if (error) return console.error(error);
 
                 var g = svg.append("g")
-                    .attr('id', data.id);
+                    .attr('id', data.id + "-box")
+                    .style('opacity', 1);
                 
                 var box = g.append("rect");
 
@@ -117,7 +163,7 @@
                     .attr('rx', 5)
                     .attr('ry', 5)
                     .style('fill', 'green')
-                    .style('opacity', .25);
+                    .style('opacity', .75);
 
                 var name = g.append('text')
                     .attr('x', parseFloat(box.attr('x')) + 5)
@@ -130,7 +176,7 @@
                 var type = g.append('text') 
                     .attr('x', parseFloat(box.attr('x')) + 5)
                     .attr('y', parseFloat(box.attr('y')) + 40)
-                    .text('Type: ' + sampleData.type);
+                    .text('Type: ' + data.type);
                 var typeBox = type.node().getBBox();
                 var typeWidth = typeBox.width;
                 var typeHeight = typeBox.height;
@@ -139,6 +185,12 @@
                 var dHeight = nameHeight + typeHeight;
                 box.attr('width', dWidth + 10); 
                 box.attr('height', dHeight + 20);
+            
+                g.moveToFront();
+            }
+
+            function main() {
+
             }
 
         </script>
