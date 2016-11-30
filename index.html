@@ -51,6 +51,7 @@
                 .append("svg")
                 .attr("width", width)
                 .attr("height", height);
+            d3.select("body").attr("style", "background-color:#CBFDFF");
 
             /*
             svg.call(d3.zoom()
@@ -93,12 +94,12 @@
 
                 var path = d3.geo.path()
                     .projection(robinsonProjection);
-                
+
                 var p = g.selectAll('path')
                     .data(feat)
                     .enter()
                     .append('path')
-                    .attr("fill", "#ccc")
+                    .attr("fill", "#9CF278")
                     .attr("d", path);
             }
     
