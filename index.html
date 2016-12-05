@@ -51,19 +51,9 @@
                 .append("svg")
                 .attr("width", width)
                 .attr("height", height);
-            d3.select("body").attr("style", "background-color:#CBFDFF");
+            //d3.select("body").attr("style", "background-color:#CBFDFF");
+            //d3.select("body").attr("style", "background-color:lightblue");
 
-            /*
-            svg.call(d3.zoom()
-                .scaleExtent([1 / 2, 4])
-                .on("zoom", zoomed))
-
-            function zoomed() {
-                context.save();
-                context.clearRect(0, 0, width, height)
-            }
-            */
- 
             d3.json("data/world_countries.json", drawMap);
 
             var dataPoints = d3.csv("data/sample.csv", 
@@ -99,7 +89,10 @@
                     .data(feat)
                     .enter()
                     .append('path')
-                    .attr("fill", "#9CF278")
+                    //.attr("fill", "#9CF278")
+                    .attr("fill", "tan")
+                    .attr("stroke", "white")
+                    //.attr("opacity", .5)
                     .attr("d", path);
             }
     
@@ -145,7 +138,17 @@
                     });
             }
                       
-
+            function textWrap(select, text) {
+                var newText = "";
+                for (i = 0; i < text.length; i++) {
+                    newText += text.charAt(i);
+                    if (i+1 % 70 == 0) {
+                        select.append('tspan')
+                            .text(newText);
+                        newText = ""
+                    }
+                }
+            } 
 
             // Build a display for data point 'data'
             function displayBox(error, data) {
@@ -163,9 +166,10 @@
                     .attr('y', robinsonProjection(data.coord)[1] - 100)
                     .attr('rx', 5)
                     .attr('ry', 5)
-                    .style('fill', 'green')
-                    .style('opacity', .75);
-
+                    .style('fill', 'white')
+                    .style('stroke', 'grey')
+                    .style('opacity', 1);
+    
                 var name = g.append('text')
                     .attr('x', parseFloat(box.attr('x')) + 5)
                     .attr('y', parseFloat(box.attr('y')) + 20)
@@ -181,9 +185,21 @@
                 var typeBox = type.node().getBBox();
                 var typeWidth = typeBox.width;
                 var typeHeight = typeBox.height;
-                
+
+                /*
+                var desc = g.append('text')
+                    .attr('x', parseFloat(box.attr('x')) + 5)
+                    .attr('y', parseFloat(box.attr('y')) + 60)
+                    .text('Description: ' + data.description);
+                //textWrap(desc, 'Description: ' + data.description);
+                var descBox = desc.node().getBBox();
+                var descWidth = descBox.width;
+                var descHeight = descBox.height;
+                */
+
+                //console.log(textWrap(desc, "hello"));
                 var dWidth = Math.max(nameWidth, typeWidth);
-                var dHeight = nameHeight + typeHeight;
+                var dHeight = nameHeight + typeHeight ;
                 box.attr('width', dWidth + 10); 
                 box.attr('height', dHeight + 20);
             
